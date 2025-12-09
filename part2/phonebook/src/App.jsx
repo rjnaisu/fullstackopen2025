@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import PersonList from "./components/PersonList";
-import axios from "axios";
+import personsService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -11,31 +11,56 @@ const App = () => {
   const [searchName, setSearchName] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
+    personsService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
     });
   }, []);
 
   const addPerson = (event) => {
     event.preventDefault();
-    if (
-      persons.some(
-        (person) => person.name.toLowerCase() === newName.toLowerCase(),
-      )
-    ) {
-      alert(`${newName} is already added to phonebook`);
+    const existing = persons.find(
+      (person) => person.name.toLowerCase() === newName.toLowerCase(),
+    );
+
+    const personObject = {
+      name: newName,
+      number: newNumber,
+    };
+
+    if (existing) {
+      if (
+        window.confirm(
+          `${newName} is already in the phonebook, replace the old number?`,
+        )
+      ) {
+        const updatedPerson = { ...existing, number: newNumber };
+        personsService
+          .update(existing.id, updatedPerson)
+          .then((returnedPerson) => {
+            setPersons(
+              persons.map((person) =>
+                person.id === existing.id ? returnedPerson : person,
+              ),
+            );
+            setNewName("");
+            setNewNumber("");
+          });
+        return;
+      }
       return;
     }
 
-    const person = {
-      name: newName,
-      number: newNumber,
-      id: persons.length + 1,
-    };
+    personsService.create(personObject).then((returnedPerson) => {
+      setPersons(persons.concat(returnedPerson));
+      setNewName("");
+      setNewNumber("");
+    });
+  };
 
-    setPersons(persons.concat(person));
-    setNewName("");
-    setNewNumber("");
+  const removePerson = (id) => {
+    personsService.remove(id).then(() => {
+      setPersons((persons) => persons.filter((person) => person.id !== id));
+    });
   };
 
   const personsToShow = searchName
@@ -57,7 +82,7 @@ const App = () => {
         onSubmit={addPerson}
       />
       <h3>Numbers</h3>
-      <PersonList persons={personsToShow} />
+      <PersonList persons={personsToShow} onDelete={removePerson} />
     </div>
   );
 };
