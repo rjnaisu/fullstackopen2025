@@ -3,12 +3,16 @@ import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import PersonList from "./components/PersonList";
 import personsService from "./services/persons";
+import Notification from "./components/Notification";
+import ErrorMessage from "./components/ErrorMessage";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchName, setSearchName] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
@@ -44,6 +48,14 @@ const App = () => {
             );
             setNewName("");
             setNewNumber("");
+            setSuccessMessage("Updated successfully");
+          })
+          .catch((error) => {
+            setErrorMessage(`${existing.name} is no longer in phonebook`);
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 2000);
+            setPersons(persons.filter((person) => person.id !== existing.id));
           });
         return;
       }
@@ -54,6 +66,10 @@ const App = () => {
       setPersons(persons.concat(returnedPerson));
       setNewName("");
       setNewNumber("");
+      setSuccessMessage("Added Successfully");
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 2000);
     });
   };
 
@@ -74,6 +90,8 @@ const App = () => {
       <h2>Phonebook</h2>
       <Filter searchName={searchName} onChange={setSearchName} />
       <h3>Add a new person</h3>
+      <Notification message={successMessage} />
+      <ErrorMessage message={errorMessage} />
       <PersonForm
         newName={newName}
         newNumber={newNumber}

@@ -6,10 +6,10 @@ const Person = ({ person, onDelete }) => {
   };
 
   return (
-    <div key={person.id}>
+    <li className="person" key={person.id}>
       {person.name} {person.number}
       <button onClick={deleteHandler}>Delete</button>
-    </div>
+    </li>
   );
 };
 
