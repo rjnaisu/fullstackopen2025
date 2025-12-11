@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
-const cors = require("cors");
+//const cors = require("cors");
 
 let people = [
   {
@@ -36,7 +36,8 @@ const logger = morgan(
 
 app.use(express.json());
 app.use(logger);
-app.use(cors());
+//app.use(cors());
+app.use(express.static("dist"));
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
