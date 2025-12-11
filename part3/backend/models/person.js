@@ -6,7 +6,7 @@ const url = process.env.MONGODB_URI;
 mongoose.set("strictQuery", false);
 mongoose
   .connect(url, { family: 4 })
-  .then((res) => {
+  .then(() => {
     console.log("connected to MongoDB");
   })
   .catch((err) => {
@@ -55,7 +55,7 @@ if (process.argv.length === 5) {
     name: process.argv[3],
     number: process.argv[4],
   });
-  person.save().then((res) => {
+  person.save().then(() => {
     console.log(`Added ${person.name} number ${person.number} to phonebook`);
     mongoose.connection.close();
   });
