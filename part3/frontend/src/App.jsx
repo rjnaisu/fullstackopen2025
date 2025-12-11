@@ -49,6 +49,9 @@ const App = () => {
             setNewName("");
             setNewNumber("");
             setSuccessMessage("Updated successfully");
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 2000);
           })
           .catch((error) => {
             setErrorMessage(`${existing.name} is no longer in phonebook`);
@@ -62,15 +65,23 @@ const App = () => {
       return;
     }
 
-    personsService.create(personObject).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson));
-      setNewName("");
-      setNewNumber("");
-      setSuccessMessage("Added Successfully");
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 2000);
-    });
+    personsService
+      .create(personObject)
+      .then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
+        setNewName("");
+        setNewNumber("");
+        setSuccessMessage("Added Successfully");
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 2000);
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.error);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 2000);
+      });
   };
 
   const removePerson = (id) => {
