@@ -1,4 +1,3 @@
-//verify blog app returns correct amount of blog post
 const assert = require("node:assert");
 const bcrypt = require("bcrypt");
 const { test, after, beforeEach, describe } = require("node:test");
@@ -12,9 +11,35 @@ const User = require("../models/user");
 const api = supertest(app);
 
 describe("Test with Initialized DB", () => {
+  let authToken;
+
   beforeEach(async () => {
+    await User.deleteMany({});
     await Blog.deleteMany({});
-    await Blog.insertMany(helper.initialBlogs);
+
+    const passwordHash = await bcrypt.hash("password", 10);
+    const user = new User({
+      username: "root",
+      name: "Root User",
+      passwordHash,
+    });
+    const savedUser = await user.save();
+
+    const savedBlogs = await Blog.insertMany(
+      helper.initialBlogs.map((blog) => ({
+        ...blog,
+        user: savedUser._id,
+      })),
+    );
+
+    savedUser.blogs = savedBlogs.map((blog) => blog._id);
+    await savedUser.save();
+
+    const loginResponse = await api
+      .post("/api/login")
+      .send({ username: "root", password: "password" });
+
+    authToken = loginResponse.body.token;
   });
 
   test("blogs are returned as json", async () => {
@@ -48,6 +73,7 @@ describe("Test with Initialized DB", () => {
 
       await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -66,6 +92,7 @@ describe("Test with Initialized DB", () => {
       };
       await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(likelessBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -82,7 +109,26 @@ describe("Test with Initialized DB", () => {
         likes: 5,
       };
 
-      await api.post("/api/blogs").send(missingTitle).expect(400);
+      await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send(missingTitle)
+        .expect(400);
+      const endBlogs = await helper.blogsInDb();
+      assert.strictEqual(endBlogs.length, helper.initialBlogs.length);
+    });
+
+    test("adding a blog without a token fails with 401", async () => {
+      const newBlog = {
+        title: "Tokenless Post",
+        author: "Agent Zero",
+        url: "http://example.com/secret",
+        likes: 1,
+      };
+
+      const result = await api.post("/api/blogs").send(newBlog).expect(401);
+
+      assert.strictEqual(result.body.error, "token missing");
       const endBlogs = await helper.blogsInDb();
       assert.strictEqual(endBlogs.length, helper.initialBlogs.length);
     });
@@ -91,7 +137,10 @@ describe("Test with Initialized DB", () => {
   describe("Accessing via ID", () => {
     test("Can delete blog using id", async () => {
       const deleteId = helper.initialBlogs[0]._id.toString();
-      await api.delete(`/api/blogs/${deleteId}`).expect(204);
+      await api
+        .delete(`/api/blogs/${deleteId}`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(204);
 
       const resultBlogs = await helper.blogsInDb();
       const ids = resultBlogs.map((blog) => blog.id);
@@ -128,7 +177,7 @@ describe("when there is one user in the db", () => {
     await user.save();
   });
 
-  test.only("create succeeds with fresh username", async () => {
+  test("create succeeds with fresh username", async () => {
     const usersAtStart = await helper.usersInDb();
     const newUser = {
       username: "rjnasm",
@@ -149,7 +198,7 @@ describe("when there is one user in the db", () => {
     assert(usernames.includes(newUser.username));
   });
 
-  test.only("fails for duplicate user", async () => {
+  test("fails for duplicate user", async () => {
     const usersAtStart = await helper.usersInDb();
     const newUser = {
       username: "root",
