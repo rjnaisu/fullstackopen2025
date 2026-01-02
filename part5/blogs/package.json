@@ -1,0 +1,28 @@
+{
+  "name": "blogs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "seed:dev": "cross-env NODE_ENV=development node scripts/seed_dev_db.js",
+    "test": "cross-env NODE_ENV=test node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.24.0",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.0.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}
