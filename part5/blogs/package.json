@@ -7,7 +7,8 @@
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development node --watch index.js",
     "seed:dev": "cross-env NODE_ENV=development node scripts/seed_dev_db.js",
-    "test": "cross-env NODE_ENV=test node --test"
+    "test": "cross-env NODE_ENV=test node --test",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,9 @@
     "mongoose": "^9.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
     "supertest": "^7.1.4"
   }
 }
