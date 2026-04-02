@@ -1,5 +1,6 @@
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const apiBaseUrl = 'http://localhost:5173/api'
 
 const initialBlogs = [
   {
@@ -62,8 +63,62 @@ const usersInDb = async () => {
   return users.map((user) => user.toJSON())
 }
 
+const loginWith = async (page, username, password) => {
+  await page.getByLabel('username').fill(username)
+  await page.getByLabel('password').fill(password)
+  await page.getByRole('button', { name: 'login' }).click()
+}
+
+const createBlog = async (page, title, author, url) => {
+  await page.getByRole('button', { name: 'Create new blog' }).click()
+  await page.getByLabel('title').fill(title)
+  await page.getByLabel('author').fill(author)
+  await page.getByLabel('url').fill(url)
+  await page.getByRole('button', { name: 'Create' }).click()
+}
+
+const resetApp = async (request) => {
+  await request.post(`${apiBaseUrl}/testing/reset`)
+}
+
+const createUserApi = async (request, user) => {
+  await request.post(`${apiBaseUrl}/users`, {
+    data: user
+  })
+}
+
+const loginViaApi = async (request, username, password) => {
+  const response = await request.post(`${apiBaseUrl}/login`, {
+    data: { username, password }
+  })
+
+  return response.json()
+}
+
+const createBlogApi = async (request, blog, token) => {
+  await request.post(`${apiBaseUrl}/blogs`, {
+    data: blog,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+}
+
+const findBlog = (page, title, author) => page.locator('.blogStyle').filter({
+  has: page.locator('.blogTitle', { hasText: title })
+}).filter({
+  has: page.locator('.blogAuthor', { hasText: author })
+})
+
 module.exports = {
   initialBlogs,
   blogsInDb,
   usersInDb,
+  loginWith,
+  createBlog,
+  resetApp,
+  createUserApi,
+  loginViaApi,
+  createBlogApi,
+  findBlog
 }
