@@ -1,10 +1,12 @@
+import { useGood, useBad, useNeutral } from "../counter"
+
 const Statistics = () => {
-  const good = 0
-  const neutral = 0
-  const bad = 0
-  const all = 0
-  const average = 0
-  const positive = 0
+  const good = useGood()
+  const neutral = useNeutral()
+  const bad = useBad()
+  const all = good + neutral + bad
+  const average = all === 0 ? 0 : (good - bad) / all
+  const positive = all === 0 ? 0 : (good / all) * 100
   
   return (
     <div>
@@ -15,8 +17,8 @@ const Statistics = () => {
           <tr><td>neutral</td><td>{neutral}</td></tr>
           <tr><td>bad</td><td>{bad}</td></tr>
           <tr><td>all</td><td>{all}</td></tr>
-          <tr><td>average</td><td>{average}</td></tr>
-          <tr><td>positive</td><td>{positive}</td></tr>
+          <tr><td>average</td><td>{average.toFixed(1)}</td></tr>
+          <tr><td>positive</td><td>{`${positive.toFixed(1)}%`}</td></tr>
         </tbody>
       </table>
     </div>
