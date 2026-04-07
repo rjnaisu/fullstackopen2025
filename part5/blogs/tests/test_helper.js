@@ -70,7 +70,7 @@ const loginWith = async (page, username, password) => {
 }
 
 const createBlog = async (page, title, author, url) => {
-  await page.getByRole('button', { name: 'Create new blog' }).click()
+  await page.getByRole('link', { name: 'New Blog' }).click()
   await page.getByLabel('title').fill(title)
   await page.getByLabel('author').fill(author)
   await page.getByLabel('url').fill(url)
@@ -104,10 +104,10 @@ const createBlogApi = async (request, blog, token) => {
   })
 }
 
-const findBlog = (page, title, author) => page.locator('.blogStyle').filter({
-  has: page.locator('.blogTitle', { hasText: title })
+const findBlog = (page, title, author) => page.getByTestId('blog-item').filter({
+  has: page.getByTestId('blog-title', { hasText: title })
 }).filter({
-  has: page.locator('.blogAuthor', { hasText: author })
+  has: page.getByTestId('blog-author', { hasText: `by ${author}` })
 })
 
 module.exports = {

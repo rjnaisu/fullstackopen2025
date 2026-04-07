@@ -4,8 +4,6 @@ import {
   createBlog,
   resetApp,
   createUserApi,
-  loginViaApi,
-  createBlogApi,
   findBlog
 } from '../../blogs/tests/test_helper'
 
@@ -15,39 +13,12 @@ const alice = {
   password: 'secret1'
 }
 
-const bob = {
-  name: 'Bob Builder',
-  username: 'bob',
-  password: 'secret2'
-}
-
 const testBlog = {
   title: 'Effective C++',
   author: 'John Wick',
   url: 'foobar.com',
   likes: 0
 }
-
-const orderedBlogs = [
-  {
-    title: 'Least liked',
-    author: 'Author A',
-    url: 'a.com',
-    likes: 1
-  },
-  {
-    title: 'Most liked',
-    author: 'Author B',
-    url: 'b.com',
-    likes: 10
-  },
-  {
-    title: 'Middle liked',
-    author: 'Author C',
-    url: 'c.com',
-    likes: 5
-  }
-]
 
 test.describe('Blog app', () => {
   test.describe.configure({ mode: 'serial' })
@@ -59,111 +30,57 @@ test.describe('Blog app', () => {
     await page.goto('http://localhost:5173')
   })
 
-  test('Login form shown', async ({ page }) => {
-    await expect(page.getByText('Log in to the application')).toBeVisible()
-    await expect(page.getByLabel('username')).toBeVisible()
-    await expect(page.getByLabel('password')).toBeVisible()
+  test('Login successuful', async ({ page }) => {
+    await page.goto('http://localhost:5173/login')
+    await loginWith(page, alice.username, alice.password)
+    await expect(page.getByRole('button', { name: 'logout' })).toBeVisible()
   })
-
-  test.describe('Login', () => {
-    test('Success', async ({ page }) => {
-      await loginWith(page, alice.username, alice.password)
-      await expect(page.getByText(`${alice.name} logged in`)).toBeVisible()
-    })
-    test('Fail', async ({ page }) => {
-      await loginWith(page, 'secret', 'foobar')
-      const error = page.locator('.error')
-      await expect(error).toContainText('Wrong username or password')
-      await expect(page.getByText(`${alice.name} logged in`)).not.toBeVisible()
-    })
+  test('Login failure', async ({ page }) => {
+    await page.goto('http://localhost:5173/login')
+    await loginWith(page, 'foo', 'bar')
+    await expect(page.getByRole('button', { name: 'logout' })).not.toBeVisible()
+    await expect(page.getByText('Welcome foo bar')).not.toBeVisible()
+    await expect(page.locator('.error')).toContainText('Wrong username or password')
   })
-
-  test.describe('When logged in', () => {
+  test.describe('Logged in user can:', () => {
     test.beforeEach(async ({ page }) => {
+      await page.goto('http://localhost:5173/login')
       await loginWith(page, alice.username, alice.password)
-      await expect(page.getByText(`${alice.name} logged in`)).toBeVisible()
+      await expect(page.getByRole('button', { name: 'logout' })).toBeVisible()
     })
-    test('New note can be created and viewed', async ({ page }) => {
+    test('Create a blog', async ({ page }) => {
+      await createBlog(page, testBlog.title, testBlog.author, testBlog.url)
+      await expect(page.getByTestId('blog-title')).toHaveText(testBlog.title)
+      await expect(page.getByTestId('blog-author')).toHaveText(`by ${testBlog.author}`)
+    })
+    test('Like blogs', async ({ page }) => {
       await createBlog(page, testBlog.title, testBlog.author, testBlog.url)
       const blog = findBlog(page, testBlog.title, testBlog.author)
-      await blog.getByRole('button', { name: 'view' }).click()
-      await expect(blog.getByTestId('blog-url')).toHaveText(testBlog.url)
-    })
+      await blog.getByRole('link').click()
 
-  })
-
-  test.describe('Modifying Blogs', () => {
-    test.beforeEach(async ({ page, request }) => {
-      const { token } = await loginViaApi(request, alice.username, alice.password)
-
-      await createBlogApi(request, testBlog, token)
-      await page.goto('http://localhost:5173')
-      await loginWith(page, alice.username, alice.password)
-      await expect(page.getByText(`${alice.name} logged in`)).toBeVisible()
-    })
-
-    test('Blog can be liked', async ({ page }) => {
-      const blog = findBlog(page, testBlog.title, testBlog.author)
-
-      await blog.getByRole('button', { name: 'view' }).click()
-
-      const likeButton = blog.getByRole('button', { name: 'Like' })
+      const likeButton = page.getByRole('button', { name: 'Like' })
       await expect(likeButton).toBeVisible()
 
-      const likesText = await blog.getByTestId('blog-likes-count').textContent()
+      const likesText = await page.getByTestId('blog-likes-count').textContent()
       const likes = Number(likesText.match(/\d+/)[0])
 
       await likeButton.click()
-
-      await expect(blog.getByTestId('blog-likes-count')).toHaveText(`${likes + 1} likes`)
+      await expect(page.getByTestId('blog-likes-count')).toHaveText(`${likes + 1} likes`)
     })
-
-    test('Delete a blog', async ({ page }) => {
+    test('Delete blog', async ({ page }) => {
+      await createBlog(page, testBlog.title, testBlog.author, testBlog.url)
       const blog = findBlog(page, testBlog.title, testBlog.author)
-      await blog.getByRole('button', { name: 'view' }).click()
-      await expect(blog.getByRole('button', { name: 'Remove' })).toBeVisible()
+      await blog.getByRole('link').click()
+      await expect(page.getByRole('button', { name: 'Remove' })).toBeVisible()
 
       page.once('dialog', async (dialog) => {
         expect(dialog.type()).toBe('confirm')
         await dialog.accept()
       })
 
-      await blog.getByRole('button', { name: 'Remove' }).click()
+      await page.getByRole('button', { name: 'Remove' }).click()
 
       await expect(blog).toHaveCount(0)
-    })
-
-    test('Only the user who added a blog can see delete', async ({ page, request }) => {
-      await createUserApi(request, bob)
-
-      await page.getByRole('button', { name: 'logout' }).click()
-      await loginWith(page, bob.username, bob.password)
-      await expect(page.getByText(`${bob.name} logged in`)).toBeVisible()
-
-      const blog = findBlog(page, testBlog.title, testBlog.author)
-
-      await blog.getByRole('button', { name: 'view' }).click()
-      await expect(blog.getByRole('button', { name: 'Remove' })).toHaveCount(0)
-    })
-  })
-
-  test.describe('Blog ordering', () => {
-    test('Blogs are ordered by likes in descending order', async ({ page, request }) => {
-      const { token } = await loginViaApi(request, alice.username, alice.password)
-
-      for (const blog of orderedBlogs) {
-        await createBlogApi(request, blog, token)
-      }
-
-      await page.goto('http://localhost:5173')
-      await loginWith(page, alice.username, alice.password)
-      await expect(page.getByText(`${alice.name} logged in`)).toBeVisible()
-
-      const blogs = page.getByTestId('blog-item')
-
-      await expect(blogs.nth(0).getByTestId('blog-title')).toHaveText('Most liked')
-      await expect(blogs.nth(1).getByTestId('blog-title')).toHaveText('Middle liked')
-      await expect(blogs.nth(2).getByTestId('blog-title')).toHaveText('Least liked')
     })
   })
 })

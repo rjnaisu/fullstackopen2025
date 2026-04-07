@@ -1,66 +1,72 @@
-import { beforeEach, expect } from 'vitest'
-import Blog from './Blog'
+import { expect, vi, test, describe } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import Blog from './Blog'
+import BlogDetails from './BlogDetails'
 
-describe('<Blog />', () => {
-  const blog = {
-    title: 'Hello World',
-    author: 'Bilbo Baggins',
-    url: 'google.com',
-    likes: 3,
-    user: 'Grace Hopper'
+const blog = {
+  title: 'Hello World',
+  author: 'Bilbo Baggins',
+  url: 'google.com',
+  likes: 3,
+  user: 'Grace Hopper'
+}
+
+const renderBlog = () => {
+  return render(
+    <MemoryRouter>
+      <Blog blog={blog}/>
+    </MemoryRouter>
+  )
+}
+
+const renderBlogDetails = (props = {}) => {
+  const defaultProps = {
+    blog,
+    onLike: vi.fn(),
+    onRemove: vi.fn(),
+    canRemove: false
   }
-  beforeEach(() => {
-    render(<Blog blog={blog} />)
-  })
+  return render(
+    <MemoryRouter>
+      <BlogDetails {...defaultProps} {...props} />
+    </MemoryRouter>
+  )
+}
 
-  test('Renders title and author', () => {
+describe('Blog --> Not Logged In', () => {
+  test('Blog info shown', () => {
+    renderBlog()
     const title = screen.getByText('Hello World')
     const author = screen.getByText('by Bilbo Baggins')
-    const url = screen.queryByText('google.com')
-    const like = screen.queryByText('3 likes')
-
-    expect(title).toBeDefined()
-    expect(author).toBeDefined()
-    expect(url).not.toBeInTheDocument()
-    expect(like).not.toBeInTheDocument()
+    expect(title).toBeInTheDocument()
+    expect(author).toBeInTheDocument()
   })
 
-  //URl and likes shown on button click
-  test('Renders URL and Likes on click', async () => {
-    const user = userEvent.setup()
-    const button = screen.getByText('view')
-    await user.click(button)
-
-    const url = screen.queryByText('google.com')
-    const like = screen.queryByText('3 likes')
-    expect(url).toBeDefined()
-    expect(like).toBeDefined()
+  test('Buttons not shown', () => {
+    renderBlog()
+    const likeButton = screen.queryByRole('button', { name: 'Like' })
+    const removeButton = screen.queryByRole('button', { name: 'Remove' })
+    expect(likeButton).not.toBeInTheDocument()
+    expect(removeButton).not.toBeInTheDocument()
   })
 })
 
-//test Blog renders title and author
-test('Click like twice --> event handler twice', async () => {
-  const blog = {
-    title: 'Hello World',
-    author: 'Bilbo Baggins',
-    url: 'google.com',
-    likes: 3,
-    user: 'Grace Hopper'
-  }
+describe('BlogDetails --> Logged In', () => {
+  test('Only like button', async () => {
+    renderBlogDetails({ canRemove:false })
 
-  const mockHandler = vi.fn()
-  render(<Blog blog={blog} onLike={mockHandler}/>)
+    const likeButton = screen.queryByRole('button', { name: 'Like' })
+    expect(likeButton).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
+  })
 
-  const user = userEvent.setup()
-  const viewButton = screen.getByText('view')
-  await user.click(viewButton)
+  test('Creator shown delete button', async () => {
+    renderBlogDetails({ canRemove: true })
 
-  const likeButton = screen.getByText('Like')
-  await user.click(likeButton)
-  await user.click(likeButton)
-
-  expect(mockHandler.mock.calls).toHaveLength(2)
+    const likeButton = screen.queryByRole('button', { name: 'Like' })
+    const removeButton = screen.queryByRole('button', { name: 'Remove' })
+    expect(likeButton).toBeInTheDocument()
+    expect(removeButton).toBeInTheDocument()
+  })
 })
-

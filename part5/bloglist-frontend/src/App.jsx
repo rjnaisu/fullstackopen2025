@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
-import Blog from './components/Blog'
+import { useEffect, useState } from 'react'
+import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
+import BlogDetails from './components/BlogDetails'
+import BlogsList from './components/BlogList'
+import BlogForm from './components/BlogForm'
+import LoginForm from './components/LoginForm'
+import NavBar from './components/NavBar'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Notification from './components/Notification'
-import LoginForm from './components/LoginForm'
-import BlogForm from './components/BlogForm'
-import Togglable from './components/Togglable'
 
 function App() {
   const [blogs, setBlogs] = useState([])
@@ -13,10 +15,11 @@ function App() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
+    blogService.getAll().then((blogs) => {
+      setBlogs(blogs)
+    })
   }, [])
 
-  //useEffect for checking local storage for logged in user
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
@@ -45,17 +48,18 @@ function App() {
     }
   }
 
-  const handleCreateBlog = async (newBlog) => {
+  const handleCreate = async (newBlog) => {
     try {
       const createdBlog = await blogService.create(newBlog)
       setBlogs((prev) => prev.concat(createdBlog))
       showNotification(`A new blog ${createdBlog.title} by ${createdBlog.author} added!`)
+      return createdBlog
     } catch {
       showNotification('Error creating blog', 'error')
+      return null
     }
   }
 
-  //
   const handleLike = async (likedBlog) => {
     const updatedBlog = {
       title: likedBlog.title,
@@ -76,53 +80,79 @@ function App() {
     }
   }
 
-  const handleRemove = async (chosenBlog) => {
-    const ok = window.confirm(`Remove blog ${chosenBlog.title} by ${chosenBlog.author}`)
-    if (!ok) {
-      return
-    }
+  const handleDelete = async (chosenBlog) => {
     try {
       await blogService.remove(chosenBlog.id)
       setBlogs((prev) => prev.filter((blog) => blog.id !== chosenBlog.id))
+      return true
     } catch {
       showNotification('oops! error deleting blog', 'error')
+      return false
     }
   }
 
   const handleLogout = () => {
     setUser(null)
+    blogService.setToken(null)
     window.localStorage.removeItem('loggedBlogappUser')
   }
 
-  //Copy blogs to array, sort most->least
   const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes)
+  const canRemoveBlog = (blog) => blog?.user?.username === user?.username
+
+  const homeMatch = useMatch('/')
+  const match = useMatch('/blogs/:id')
+  const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null
+  const showBlogsHeading = Boolean(homeMatch)
 
   return (
     <div>
-      <h1>Blogs</h1>
+      <NavBar user={user} onLogout={handleLogout} />
+      {showBlogsHeading && <h1>Blogs</h1>}
       <Notification notification={notification} />
-
-      {!user ? (
-        <LoginForm onLogin={handleLogin} />
-      ) : (
-        <div>
-          <p>
-            {user.name} logged in<button onClick={handleLogout}>logout</button>
-          </p>
-          <Togglable buttonLabel="Create new blog">
-            <BlogForm onCreate={handleCreateBlog} />
-          </Togglable>
-          {sortedBlogs.map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              onLike={handleLike}
-              onRemove={handleRemove}
-              canRemove={blog.user?.username === user.username}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <BlogsList
+              blogs={sortedBlogs}
             />
-          ))}
-        </div>
-      )}
+          }
+        />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" replace /> : <LoginForm onLogin={handleLogin} />}
+        />
+        <Route
+          path="/blogs"
+          element={<Navigate to="/" replace />}
+        />
+        <Route
+          path="/blogs/:id"
+          element={
+            user ? (
+              <BlogDetails
+                blog={blog}
+                onLike={handleLike}
+                onRemove={handleDelete}
+                canRemove={canRemoveBlog(blog)}
+              />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path='/create'
+          element={
+            user ? (
+              <BlogForm onCreate={handleCreate} />
+            ) : (
+              <Navigate to ='/login' replace />
+            )
+          }
+        />
+      </Routes>
     </div>
   )
 }
