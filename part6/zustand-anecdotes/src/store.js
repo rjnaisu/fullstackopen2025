@@ -44,3 +44,4 @@ export const useAnecdotesToShow = () =>
       return filtered.toSorted((a, b) => b.votes - a.votes);
     }),
   );
+export default useAnecdoteStore;
