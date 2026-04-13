@@ -1,10 +1,14 @@
+import { useAnecdotes } from "../hooks/useAnecdotes";
+
 const AnecdoteForm = () => {
-  const onCreate = (event) => {
-    event.preventDefault()
-    const content = event.target.anecdote.value
-    event.target.reset()
-    console.log('new anecdote')
-  }
+  const { addAnecdote } = useAnecdotes();
+
+  const onCreate = async (event) => {
+    event.preventDefault();
+    const content = event.target.anecdote.value;
+    event.target.reset();
+    addAnecdote(content);
+  };
 
   return (
     <div>
@@ -14,7 +18,7 @@ const AnecdoteForm = () => {
         <button type="submit">create</button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default AnecdoteForm
+export default AnecdoteForm;
