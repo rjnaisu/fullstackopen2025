@@ -5,7 +5,7 @@ import Notification from "./components/Notification";
 import { useAnecdoteActions } from "./store";
 import { useEffect } from "react";
 
-const App = () => {
+function App() {
   const { initialize } = useAnecdoteActions();
 
   useEffect(() => {
@@ -20,6 +20,6 @@ const App = () => {
       <AnecdoteForm />
     </div>
   );
-};
+}
 
 export default App;
