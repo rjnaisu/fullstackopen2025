@@ -58,13 +58,17 @@ blogRouter.put("/:id", async (req, res) => {
 });
 
 blogRouter.post("/:id/comments", async (req, res) => {
-  const blog = await Blog.findbyId(req.params.id);
+  const blog = await Blog.findById(req.params.id);
   if (!blog) {
     return res.status(404).json({ error: "blog not found" });
   }
   blog.comments = blog.comments.concat(req.body.comment);
   const savedBlog = await blog.save();
-  res.status(204).json(savedBlog);
+  const populatedBlog = await savedBlog.populate("user", {
+    username: 1,
+    name: 1,
+  });
+  res.status(200).json(populatedBlog);
 });
 
 module.exports = blogRouter;

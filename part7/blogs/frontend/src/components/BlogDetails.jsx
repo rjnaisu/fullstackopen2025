@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useState } from "react";
 
 const Card = styled.article`
   width: min(100%, 40rem);
@@ -52,8 +53,9 @@ const RemoveButton = styled(Button)`
   color: #8d4e4e;
 `;
 
-const BlogDetails = ({ blog, onLike, onRemove, canRemove }) => {
+const BlogDetails = ({ blog, onLike, onRemove, onAddComment, canRemove }) => {
   const navigate = useNavigate();
+  const [comment, setComment] = useState("");
 
   if (!blog) {
     return <p>Blog not found.</p>;
@@ -74,6 +76,17 @@ const BlogDetails = ({ blog, onLike, onRemove, canRemove }) => {
   };
 
   const comments = Array.isArray(blog.comments) ? blog.comments : [];
+
+  const handleComment = async (event) => {
+    event.preventDefault();
+    if (!comment.trim()) return;
+    try {
+      await onAddComment(blog.id, comment);
+      setComment("");
+    } catch (err) {
+      console.error("Failed to add comment ", err);
+    }
+  };
 
   return (
     <Card>
@@ -99,6 +112,15 @@ const BlogDetails = ({ blog, onLike, onRemove, canRemove }) => {
         )}
       </FixedBottom>
       <h2>Comments</h2>
+      <form onSubmit={handleComment}>
+        <input
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          type="text"
+          placeholder="Add a comment"
+        />
+        <Button type="submit">Add Comment</Button>
+      </form>
       {comments.length > 0 ? (
         <ul>
           {comments.map((comment, index) => (

@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useField } from "../hooks/useField";
 
 const Form = styled.form`
   width: min(100%, 26rem);
@@ -45,21 +45,24 @@ const SubmitButton = styled.button`
 `;
 
 const BlogForm = ({ onCreate }) => {
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
+  const [title, resetTitle] = useField("text");
+  const [author, resetAuthor] = useField("text");
+  const [url, resetUrl] = useField("text");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const createdBlog = await onCreate({ title, author, url });
+    const createdBlog = await onCreate({
+      title: title.value,
+      author: author.value,
+      url: url.value,
+    });
     if (!createdBlog) {
       return;
     }
-
-    setTitle("");
-    setAuthor("");
-    setUrl("");
+    resetTitle();
+    resetAuthor();
+    resetUrl();
     navigate("/");
   };
 
@@ -67,29 +70,11 @@ const BlogForm = ({ onCreate }) => {
     <Form onSubmit={handleSubmit}>
       <Title>Create new</Title>
 
-      <Input
-        type="text"
-        aria-label="title"
-        value={title}
-        placeholder="title"
-        onChange={({ target }) => setTitle(target.value)}
-      />
+      <Input aria-label="title" placeholder="title" {...title} />
 
-      <Input
-        type="text"
-        aria-label="author"
-        value={author}
-        placeholder="author"
-        onChange={({ target }) => setAuthor(target.value)}
-      />
+      <Input aria-label="author" placeholder="author" {...author} />
 
-      <Input
-        type="text"
-        aria-label="url"
-        value={url}
-        placeholder="url"
-        onChange={({ target }) => setUrl(target.value)}
-      />
+      <Input aria-label="url" placeholder="url" {...url} />
 
       <SubmitButton type="submit">Create</SubmitButton>
     </Form>

@@ -45,6 +45,18 @@ export const useBlogs = (showNotification) => {
     },
   });
 
+  const commentBlogMutation = useMutation({
+    mutationFn: ({ id, comment }) => blogService.addComment(id, comment),
+    onSuccess: (commentedBlog) => {
+      queryClient.setQueryData(["blogs"], (blogs = []) =>
+        blogs.map((blog) => (blog.id === commentedBlog.id ? commentedBlog : blog)),
+      );
+    },
+    onError: () => {
+      showNotification("Error adding comment", "error");
+    },
+  });
+
   const blogs = result.data ?? [];
   const sortedBlogs = [...blogs].sort((a, b) => b.likes - a.likes);
 
@@ -69,6 +81,9 @@ export const useBlogs = (showNotification) => {
       } catch {
         return false;
       }
+    },
+    addComment: async (id, comment) => {
+      return await commentBlogMutation.mutateAsync({ id, comment });
     },
   };
 };
