@@ -73,6 +73,8 @@ const BlogDetails = ({ blog, onLike, onRemove, canRemove }) => {
     }
   };
 
+  const comments = Array.isArray(blog.comments) ? blog.comments : [];
+
   return (
     <Card>
       <Title>{blog.title}</Title>
@@ -96,6 +98,16 @@ const BlogDetails = ({ blog, onLike, onRemove, canRemove }) => {
           </RemoveButton>
         )}
       </FixedBottom>
+      <h2>Comments</h2>
+      {comments.length > 0 ? (
+        <ul>
+          {comments.map((comment, index) => (
+            <li key={`${comment}-${index}`}>{comment}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No comments yet.</p>
+      )}
     </Card>
   );
 };

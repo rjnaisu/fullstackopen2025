@@ -1,5 +1,6 @@
-import { useState } from "react";
 import styled from "styled-components";
+import useUser from "../hooks/useUser";
+import { useField } from "../hooks/useField";
 
 const Form = styled.form`
   width: min(100%, 23rem);
@@ -43,38 +44,32 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-const LoginForm = ({ onLogin }) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const LoginForm = ({ showNotification }) => {
+  const { login } = useUser();
+  const [username, resetUsername] = useField("text");
+  const [password, resetPassword] = useField("password");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    onLogin({ username, password });
-    setUsername("");
-    setPassword("");
+    const user = await login({ username: username.value, password: password.value });
+
+    if (user) {
+      showNotification(`Welcome ${user.name}!`);
+      resetUsername();
+      resetPassword();
+      return;
+    }
+
+    showNotification("Wrong username or password", "error");
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Title>Log in to the application</Title>
 
-      <Input
-        id="username"
-        aria-label="username"
-        placeholder="username"
-        type="text"
-        value={username}
-        onChange={({ target }) => setUsername(target.value)}
-      />
+      <Input id="username" aria-label="username" placeholder="username" {...username} />
 
-      <Input
-        id="password"
-        aria-label="password"
-        placeholder="password"
-        type="password"
-        value={password}
-        onChange={({ target }) => setPassword(target.value)}
-      />
+      <Input id="password" aria-label="password" placeholder="password" {...password} />
 
       <SubmitButton type="submit">login</SubmitButton>
     </Form>

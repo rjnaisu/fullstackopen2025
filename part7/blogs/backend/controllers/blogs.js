@@ -50,8 +50,21 @@ blogRouter.delete("/:id", userExtractor, async (req, res) => {
 
 blogRouter.put("/:id", async (req, res) => {
   const id = req.params.id;
-  const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, { new: true });
+  const updatedBlog = await Blog.findByIdAndUpdate(id, req.body, { new: true }).populate("user", {
+    username: 1,
+    name: 1,
+  });
   res.status(200).json(updatedBlog);
+});
+
+blogRouter.post("/:id/comments", async (req, res) => {
+  const blog = await Blog.findbyId(req.params.id);
+  if (!blog) {
+    return res.status(404).json({ error: "blog not found" });
+  }
+  blog.comments = blog.comments.concat(req.body.comment);
+  const savedBlog = await blog.save();
+  res.status(204).json(savedBlog);
 });
 
 module.exports = blogRouter;

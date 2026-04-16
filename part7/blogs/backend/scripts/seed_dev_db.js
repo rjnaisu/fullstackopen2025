@@ -18,6 +18,7 @@ const blogsData = [
     url: "https://example.com/async-patterns-node",
     likes: 12,
     username: "alice",
+    comments: ["awesome", "amazing", "saved me a lot of time"],
   },
   {
     title: "Testing Express APIs with Supertest",
@@ -25,6 +26,7 @@ const blogsData = [
     url: "https://example.com/testing-express-apis",
     likes: 7,
     username: "alice",
+    comments: ["terrible", "why would i read this?", "the examples were still useful"],
   },
   {
     title: "From Callbacks to Promises",
@@ -32,6 +34,7 @@ const blogsData = [
     url: "https://example.com/callbacks-to-promises",
     likes: 4,
     username: "ben",
+    comments: ["clear explanation", "good beginner article", "nice refactor examples"],
   },
   {
     title: "Debugging Mongoose Queries",
@@ -39,6 +42,7 @@ const blogsData = [
     url: "https://example.com/debugging-mongoose",
     likes: 9,
     username: "ben",
+    comments: ["very practical", "this fixed my populate bug", "solid debugging checklist"],
   },
   {
     title: "JWT Auth Done Right",
@@ -46,6 +50,7 @@ const blogsData = [
     url: "https://example.com/jwt-auth-done-right",
     likes: 11,
     username: "ben",
+    comments: ["helpful security notes", "well structured post", "token expiry section was great"],
   },
   {
     title: "Clean API Error Handling",
@@ -53,6 +58,7 @@ const blogsData = [
     url: "https://example.com/clean-api-errors",
     likes: 6,
     username: "cora",
+    comments: ["good examples", "this made middleware clearer", "easy to follow"],
   },
   {
     title: "Designing RESTful Routes",
@@ -60,6 +66,7 @@ const blogsData = [
     url: "https://example.com/designing-restful-routes",
     likes: 3,
     username: "cora",
+    comments: ["nice route naming advice", "helpful overview", "good reference post"],
   },
   {
     title: "Scaling with Indexes",
@@ -67,6 +74,7 @@ const blogsData = [
     url: "https://example.com/scaling-with-indexes",
     likes: 8,
     username: "drew",
+    comments: ["helpful performance tips", "explains indexes well", "great production advice"],
   },
   {
     title: "Schema Design for Blogs",
@@ -74,6 +82,7 @@ const blogsData = [
     url: "https://example.com/schema-design-blogs",
     likes: 5,
     username: "drew",
+    comments: ["useful schema examples", "helped with modeling", "good tradeoff discussion"],
   },
   {
     title: "Keeping Dev Data Consistent",
@@ -81,6 +90,7 @@ const blogsData = [
     url: "https://example.com/dev-data-consistency",
     likes: 2,
     username: "drew",
+    comments: ["seed script tips were useful", "nice practical article", "this will help our team"],
   },
 ];
 
@@ -115,6 +125,7 @@ const seed = async () => {
       author: blog.author,
       url: blog.url,
       likes: blog.likes,
+      comments: blog.comments ?? [],
       user: blogOwner._id,
     });
     const savedBlog = await newBlog.save();

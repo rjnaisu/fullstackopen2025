@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import useUser from "../hooks/useUser";
 
 const Navigation = styled.nav`
   width: min(100%, 40rem);
@@ -41,7 +42,9 @@ const LogoutButton = styled.button`
   cursor: pointer;
 `;
 
-const NavBar = ({ user, onLogout }) => {
+const NavBar = () => {
+  const { user, logout } = useUser();
+
   return (
     <Navigation>
       <Title>Blog App</Title>
@@ -49,8 +52,9 @@ const NavBar = ({ user, onLogout }) => {
       <NavLink to="/">Blogs</NavLink>
       {user ? (
         <>
+          <NavLink to="/users">Users</NavLink>
           <NavLink to="/create">New Blog</NavLink>
-          <LogoutButton type="button" onClick={onLogout}>
+          <LogoutButton type="button" onClick={logout}>
             logout
           </LogoutButton>
         </>
