@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import blogService from "../services/blogs";
+import { useNotification } from "./useNotification";
 
-export const useBlogs = (showNotification) => {
+export const useBlogs = () => {
   const queryClient = useQueryClient();
+  const { showNotification } = useNotification();
 
   const result = useQuery({
     queryKey: ["blogs"],

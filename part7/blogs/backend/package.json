@@ -5,14 +5,14 @@
   "keywords": [],
   "license": "ISC",
   "author": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node index.js",
-    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "start": "cross-env NODE_ENV=production node src/index.js",
+    "dev": "cross-env NODE_ENV=development node --watch src/index.js",
     "seed:dev": "cross-env NODE_ENV=development node scripts/seed_dev_db.js",
     "test": "cross-env NODE_ENV=test node --test",
     "lint": "eslint .",
-    "start:test": "cross-env NODE_ENV=test node --watch index.js"
+    "start:test": "cross-env NODE_ENV=test node --watch src/index.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

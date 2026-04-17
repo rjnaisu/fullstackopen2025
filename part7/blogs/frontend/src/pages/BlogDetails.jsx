@@ -53,6 +53,28 @@ const RemoveButton = styled(Button)`
   color: #8d4e4e;
 `;
 
+const CommentForm = styled.form`
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+`;
+
+const CommentInput = styled.input`
+  flex: 1;
+  min-height: 100%;
+  padding: 0.7rem 0.95rem;
+  border: 1px solid #c9c9c9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-size: 0.95rem;
+
+  &:focus {
+    outline: none;
+    border-color: #8a9a90;
+  }
+`;
+
 const BlogDetails = ({ blog, onLike, onRemove, onAddComment, canRemove }) => {
   const navigate = useNavigate();
   const [comment, setComment] = useState("");
@@ -112,15 +134,15 @@ const BlogDetails = ({ blog, onLike, onRemove, onAddComment, canRemove }) => {
         )}
       </FixedBottom>
       <h2>Comments</h2>
-      <form onSubmit={handleComment}>
-        <input
+      <CommentForm onSubmit={handleComment}>
+        <CommentInput
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           type="text"
           placeholder="Add a comment"
         />
         <Button type="submit">Add Comment</Button>
-      </form>
+      </CommentForm>
       {comments.length > 0 ? (
         <ul>
           {comments.map((comment, index) => (

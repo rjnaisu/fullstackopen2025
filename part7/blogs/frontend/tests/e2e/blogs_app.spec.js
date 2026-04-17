@@ -5,7 +5,7 @@ import {
   resetApp,
   createUserApi,
   findBlog,
-} from "../../blogs/tests/test_helper";
+} from "../helpers/test_helper.js";
 
 const alice = {
   name: "Alice Walker",

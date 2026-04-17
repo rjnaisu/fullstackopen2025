@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import useUser from "../hooks/useUser";
 import { useField } from "../hooks/useField";
+import { useNotification } from "../hooks/useNotification";
 
 const Form = styled.form`
   width: min(100%, 23rem);
@@ -44,8 +45,9 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-const LoginForm = ({ showNotification }) => {
+const LoginForm = () => {
   const { login } = useUser();
+  const { showNotification } = useNotification();
   const [username, resetUsername] = useField("text");
   const [password, resetPassword] = useField("password");
 

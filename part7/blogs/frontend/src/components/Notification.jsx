@@ -17,6 +17,7 @@ const Message = styled.div.attrs(({ $type }) => ({
   className: $type,
 }))`
   margin: 0 0 1rem;
+  width: min(100%, 40rem);
   padding: 0.75rem 0.9rem;
   border: 1px solid #bfd0c3;
   border-radius: 6px;

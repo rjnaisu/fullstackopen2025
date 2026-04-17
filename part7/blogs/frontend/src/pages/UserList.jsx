@@ -1,18 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import styled from "styled-components";
-import User from "./User";
+import User from "../components/User";
 import userService from "../services/users";
 
 const TableWrapper = styled.section`
-  width: min(100%, 48rem);
+  width: min(100%, 40rem);
+  padding: 1rem;
+  border: 1px solid #c9d2cb;
+  border-radius: 6px;
+  background: #f8faf7;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #d7dfd8;
-  border-radius: 8px;
-  overflow: hidden;
   background: #ffffff;
 `;
 
@@ -22,6 +23,13 @@ const TableHeader = styled.th`
   color: #466055;
   text-align: left;
   font-weight: 700;
+`;
+
+const Title = styled.h2`
+  margin-top: 0;
+  color: #1f1f1f;
+  font-size: 1.6rem;
+  font-weight: 600;
 `;
 
 const UserList = () => {
@@ -49,7 +57,7 @@ const UserList = () => {
 
   return (
     <TableWrapper>
-      <h1>Users</h1>
+      <Title>Users</Title>
       <Table>
         <thead>
           <tr>

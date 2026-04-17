@@ -7,7 +7,7 @@ const Card = styled.article`
   padding: 0.85rem 1rem;
   border: 1px solid #c9d2cb;
   border-radius: 6px;
-  background: #f8faf7;
+  background: #eef4ef;
 `;
 
 const BlogLink = styled(Link)`

@@ -1,8 +1,8 @@
 import { expect, vi, test, describe } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Blog from "./Blog";
-import BlogDetails from "./BlogDetails";
+import Blog from "../../src/components/Blog";
+import BlogDetails from "../../src/pages/BlogDetails";
 
 const blog = {
   title: "Hello World",

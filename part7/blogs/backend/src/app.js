@@ -9,6 +9,8 @@ const loginRouter = require("./controllers/login");
 
 const app = express();
 const path = require("path");
+const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
+
 app.use(express.json());
 app.use(middleware.tokenExtractor);
 
@@ -23,7 +25,7 @@ mongoose
     console.log(`Error connecting to DB ${err}`);
   });
 
-app.use(express.static("../frontend/dist"));
+app.use(express.static(frontendDistPath));
 app.use(middleware.requestLogger);
 
 app.use("/api/blogs", blogRouter);
@@ -39,7 +41,7 @@ app.use("/api", middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 
 app.get("/{*splat}", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+  res.sendFile(path.join(frontendDistPath, "index.html"));
 });
 
 module.exports = app;

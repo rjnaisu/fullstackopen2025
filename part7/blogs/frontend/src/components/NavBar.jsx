@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import useUser from "../hooks/useUser";
+import { useNotification } from "../hooks/useNotification";
 
 const Navigation = styled.nav`
   width: min(100%, 40rem);
@@ -44,6 +45,12 @@ const LogoutButton = styled.button`
 
 const NavBar = () => {
   const { user, logout } = useUser();
+  const { showNotification } = useNotification();
+
+  const handleLogout = () => {
+    logout();
+    showNotification("Logged out successfully");
+  };
 
   return (
     <Navigation>
@@ -54,7 +61,7 @@ const NavBar = () => {
         <>
           <NavLink to="/users">Users</NavLink>
           <NavLink to="/create">New Blog</NavLink>
-          <LogoutButton type="button" onClick={logout}>
+          <LogoutButton type="button" onClick={handleLogout}>
             logout
           </LogoutButton>
         </>

@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const { MONGODB_URI } = require("../utils/config");
-const Blog = require("../models/blog");
-const User = require("../models/user");
+const { MONGODB_URI } = require("../src/utils/config");
+const Blog = require("../src/models/blog");
+const User = require("../src/models/user");
 
 const usersData = [
   { username: "alice", name: "Alice Walker", password: "secret1" },

@@ -1,29 +1,12 @@
-import { useEffect, useReducer, useRef } from "react";
-import notifReducer from "../utils/notifReducer";
+import { useContext } from "react";
+import NotificationContext from "../context/NotificationContext";
 
-export const useNotification = (duration = 3000) => {
-  const [notification, dispatchNotification] = useReducer(notifReducer, null);
-  const timeoutRef = useRef(null);
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  if (!context) {
+    throw new Error("useNotification must be used within a NotificationContextProvider");
+  }
 
-  const showNotification = (message, status = "success") => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    dispatchNotification({ type: "show", payload: { message, status } });
-    timeoutRef.current = setTimeout(() => {
-      dispatchNotification({ type: "clear" });
-      timeoutRef.current = null;
-    }, duration);
-  };
-
-  return { notification, showNotification };
+  return context;
 };

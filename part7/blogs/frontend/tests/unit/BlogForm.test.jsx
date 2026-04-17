@@ -2,7 +2,7 @@ import { expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import BlogForm from "./BlogForm";
+import BlogForm from "../../src/pages/BlogForm";
 
 //test Blog renders title and author
 test("New blog correct details", async () => {

@@ -3,9 +3,13 @@ import styled from "styled-components";
 import { useField } from "../hooks/useField";
 
 const Form = styled.form`
-  width: min(100%, 26rem);
+  width: min(100%, 40rem);
   display: grid;
   gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #c9d2cb;
+  border-radius: 6px;
+  background: #f8faf7;
 `;
 
 const Title = styled.h2`

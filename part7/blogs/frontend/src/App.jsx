@@ -1,15 +1,15 @@
 import { Navigate, Route, Routes, useMatch } from "react-router-dom";
 import styled, { createGlobalStyle } from "styled-components";
-import BlogDetails from "./components/BlogDetails";
-import BlogsList from "./components/BlogList";
-import BlogForm from "./components/BlogForm";
-import LoginForm from "./components/LoginForm";
+import BlogDetails from "./pages/BlogDetails";
+import BlogsList from "./pages/BlogList";
+import BlogForm from "./pages/BlogForm";
+import LoginForm from "./pages/LoginForm";
 import NavBar from "./components/NavBar";
 import Notification from "./components/Notification";
 import ErrorBoundary from "./components/ErrorBoundary";
-import NotFound from "./components/NotFound";
-import UserList from "./components/UserList";
-import UserDetails from "./components/UserDetails";
+import NotFound from "./pages/NotFound";
+import UserList from "./pages/UserList";
+import UserDetails from "./pages/UserDetails";
 import { useBlogs } from "./hooks/useBlogs";
 import { useNotification } from "./hooks/useNotification";
 import useUser from "./hooks/useUser";
@@ -33,45 +33,26 @@ const AppShell = styled.main`
   padding: 2rem 1rem 3rem;
 `;
 
-const PageTitle = styled.h1`
-  margin: 0 0 1rem;
-`;
-
 function App() {
-  const { notification, showNotification } = useNotification();
-  const { blogs, addBlog, likeBlog, deleteBlog, addComment } = useBlogs(showNotification);
+  const { notification } = useNotification();
+  const { blogs, addBlog, likeBlog, deleteBlog, addComment } = useBlogs();
   const { user } = useUser();
 
   const canRemoveBlog = (blog) => blog?.user?.username === user?.username;
 
-  const homeMatch = useMatch("/");
   const match = useMatch("/blogs/:id");
   const blog = match ? blogs.find((blog) => blog.id === match.params.id) : null;
-  const showBlogsHeading = Boolean(homeMatch);
 
   return (
     <>
       <GlobalStyle />
       <AppShell>
         <NavBar />
-        {showBlogsHeading && <PageTitle>Blogs</PageTitle>}
         <Notification notification={notification} />
         <Routes>
           <Route path="*" element={<NotFound />} />
-          <Route
-            path="/"
-            element={
-              <ErrorBoundary>
-                <BlogsList blogs={blogs} />
-              </ErrorBoundary>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              user ? <Navigate to="/" replace /> : <LoginForm showNotification={showNotification} />
-            }
-          />
+          <Route path="/" element={<BlogsList blogs={blogs} />} />
+          <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginForm />} />
           <Route path="/blogs" element={<Navigate to="/" replace />} />
           <Route
             path="/blogs/:id"

@@ -8,8 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "format": "eslint . --fix",
-    "vitest": "vitest run",
-    "test": "playwright test --project=chromium",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test --project=chromium",
     "test:report": "playwright show-report"
   },
   "dependencies": {

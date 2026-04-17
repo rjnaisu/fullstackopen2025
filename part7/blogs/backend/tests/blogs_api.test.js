@@ -3,10 +3,10 @@ const bcrypt = require("bcrypt");
 const { test, after, beforeEach, describe } = require("node:test");
 const mongoose = require("mongoose");
 const supertest = require("supertest");
-const app = require("../app");
+const app = require("../src/app");
 const helper = require("./test_helper");
-const Blog = require("../models/blog");
-const User = require("../models/user");
+const Blog = require("../src/models/blog");
+const User = require("../src/models/user");
 
 const api = supertest(app);
 
