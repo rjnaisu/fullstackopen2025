@@ -1,0 +1,11 @@
+{
+  "name": "part8",
+  "private": true,
+  "scripts": {
+    "fmt": "oxfmt .",
+    "format:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "oxfmt": "^0.45.0"
+  }
+}
