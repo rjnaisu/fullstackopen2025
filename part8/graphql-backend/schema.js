@@ -29,6 +29,7 @@ const typeDefs = /* GraphQL */ `
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
     me: User
+    allGenres: [String!]!
   }
   type Mutation {
     addBook(title: String!, author: String!, published: Int!, genres: [String!]!): Book

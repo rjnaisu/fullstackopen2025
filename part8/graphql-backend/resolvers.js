@@ -42,6 +42,11 @@ const resolvers = {
     me: async (_, args, context) => {
       return context.currentUser
     },
+    allGenres: async () => {
+      const books = await Book.find({}, { genres: 1 })
+      const genres = books.flatMap((book) => book.genres)
+      return [...new Set(genres)]
+    },
   },
   Author: {
     bookCount: async (root) => Book.countDocuments({ author: root._id }),
