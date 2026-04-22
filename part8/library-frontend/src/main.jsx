@@ -5,10 +5,9 @@ import App from './App.jsx'
 
 import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/client'
 import { ApolloProvider } from '@apollo/client/react'
-
-const httpLink = new HttpLink({
-  uri: 'http://localhost:4000',
-})
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { getMainDefinition } from '@apollo/client/utilities/index.js'
+import { createClient } from 'graphql-ws'
 
 const authLink = new ApolloLink((operation, forward) => {
   const token = localStorage.getItem('bookapp-user-token')
@@ -23,8 +22,27 @@ const authLink = new ApolloLink((operation, forward) => {
   return forward(operation)
 })
 
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000',
+})
+
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: 'ws://localhost:4000',
+  }),
+)
+
+const splitLink = ApolloLink.split(
+  ({ query }) => {
+    const def = getMainDefinition(query)
+    return def.kind === 'OperationDefinition' && def.operation === 'subscription'
+  },
+  wsLink,
+  authLink.concat(httpLink),
+)
+
 const client = new ApolloClient({
-  link: ApolloLink.from([authLink, httpLink]),
+  link: splitLink,
   cache: new InMemoryCache(),
 })
 

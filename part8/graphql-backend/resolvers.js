@@ -2,7 +2,10 @@ import { GraphQLError } from 'graphql'
 import Author from './models/author.js'
 import Book from './models/book.js'
 import User from './models/user.js'
+import { PubSub } from 'graphql-subscriptions'
 import jwt from 'jsonwebtoken'
+
+const pubsub = new PubSub()
 
 const validateMinLength = (fieldName, value, minLength) => {
   if (value.length < minLength) {
@@ -39,9 +42,7 @@ const resolvers = {
       return Book.find(filter).populate('author')
     },
     allAuthors: async () => Author.find({}),
-    me: async (_, args, context) => {
-      return context.currentUser
-    },
+    me: async (_, args, context) => context.currentUser,
     allGenres: async () => {
       const books = await Book.find({}, { genres: 1 })
       const genres = books.flatMap((book) => book.genres)
@@ -49,7 +50,9 @@ const resolvers = {
     },
   },
   Author: {
-    bookCount: async (root) => Book.countDocuments({ author: root._id }),
+    bookCount: async (root, args, context) => {
+      return context.bookCountLoader.load(String(root._id))
+    },
   },
   Mutation: {
     addBook: async (_, args, context) => {
@@ -79,7 +82,11 @@ const resolvers = {
       })
 
       const savedBook = await book.save()
-      return savedBook.populate('author')
+      const populatedBook = await savedBook.populate('author')
+
+      await pubsub.publish('BOOK_ADDED', { bookAdded: populatedBook })
+
+      return populatedBook
     },
     editAuthor: async (_, args, context) => {
       const currentUser = context.currentUser
@@ -129,6 +136,11 @@ const resolvers = {
         id: user._id,
       }
       return { value: jwt.sign(userForToken, process.env.JWT_SECRET) }
+    },
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterableIterator('BOOK_ADDED'),
     },
   },
 }
